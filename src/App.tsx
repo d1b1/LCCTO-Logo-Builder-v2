@@ -14,7 +14,6 @@ import {
   setBorderRadius,
   setBorderColor,
   setIconColor,
-  setIconColorAtIndex,
   setBorderOffset,
   addIcon,
   removeIcon,
@@ -31,9 +30,8 @@ function App() {
     borderRadius,
     borderColor,
     iconColor,
-    iconColors = ['#374151', '#374151', '#374151', '#374151'],
     borderOffset,
-    selectedIcons = []
+    selectedIcons
   } = useSelector((state: RootState) => state.banner);
   
   const [selectedIcon, setSelectedIcon] = React.useState<IconData | null>(null);
@@ -104,14 +102,14 @@ function App() {
               <div style="
                 display: flex;
                 align-items: center;
-                justify-content: center;
+                justify-center;
                 transform: translateY(-${verticalOffset}px);
               ">
                 <i 
                   class="fa-${icon.family} fa-${icon.name} fa-${icon.style}"
                   style="
                     font-size: ${iconSize}px;
-                    color: ${iconColors[index]};
+                    color: ${iconColor};
                     display: inline-block;
                     line-height: 1;
                   "
@@ -207,7 +205,7 @@ function App() {
                                 className={`fa-${icon.family} fa-${icon.name} fa-${icon.style} transition-colors`}
                                 style={{ 
                                   fontSize: `${iconSize}px`,
-                                  color: iconColors[index],
+                                  color: iconColor,
                                   lineHeight: 1,
                                   display: 'inline-block'
                                 }}
@@ -346,7 +344,7 @@ function App() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="iconColor" className="block text-sm font-medium text-gray-700 mb-2">
-                      Icon Color (All)
+                      Icon Color
                     </label>
                     <div className="flex items-center gap-4">
                       <input
@@ -380,27 +378,6 @@ function App() {
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">px</span>
                     </div>
-                  </div>
-                </div>
-
-                {/* Individual Icon Colors */}
-                <div className="border-t border-gray-200 pt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Individual Icon Colors
-                  </label>
-                  <div className="grid grid-cols-4 gap-4">
-                    {Array.from({ length: 4 }).map((_, index) => (
-                      <div key={index} className="flex flex-col items-center gap-2">
-                        <input
-                          type="color"
-                          value={iconColors[index] || iconColor}
-                          onChange={(e) => dispatch(setIconColorAtIndex({ index, color: e.target.value }))}
-                          className="h-8 w-12 rounded cursor-pointer"
-                          disabled={!selectedIcons[index]}
-                        />
-                        <span className="text-xs text-gray-500">Icon {index + 1}</span>
-                      </div>
-                    ))}
                   </div>
                 </div>
 
