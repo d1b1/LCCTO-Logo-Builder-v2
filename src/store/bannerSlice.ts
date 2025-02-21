@@ -6,6 +6,10 @@ interface BannerState {
   iconSpacing: number;
   bannerWidth: number;
   bannerHeight: number;
+  borderWidth: number;
+  borderRadius: number;
+  borderColor: string;
+  iconColor: string;
   selectedIcons: IconData[];
 }
 
@@ -14,20 +18,28 @@ const loadState = (): BannerState => {
     const serializedState = localStorage.getItem('bannerState');
     if (serializedState === null) {
       return {
-        iconSize: 24,
-        iconSpacing: 48,
+        iconSize: 96,
+        iconSpacing: 16,
         bannerWidth: 600,
-        bannerHeight: 100,
+        bannerHeight: 600,
+        borderWidth: 2,
+        borderRadius: 16,
+        borderColor: '#000000',
+        iconColor: '#374151',
         selectedIcons: []
       };
     }
     return JSON.parse(serializedState);
   } catch (err) {
     return {
-      iconSize: 24,
-      iconSpacing: 48,
+      iconSize: 96,
+      iconSpacing: 16,
       bannerWidth: 600,
-      bannerHeight: 100,
+      bannerHeight: 600,
+      borderWidth: 2,
+      borderRadius: 16,
+      borderColor: '#000000',
+      iconColor: '#374151',
       selectedIcons: []
     };
   }
@@ -51,14 +63,25 @@ export const bannerSlice = createSlice({
     setBannerHeight: (state, action: PayloadAction<number>) => {
       state.bannerHeight = action.payload;
     },
+    setBorderWidth: (state, action: PayloadAction<number>) => {
+      state.borderWidth = action.payload;
+    },
+    setBorderRadius: (state, action: PayloadAction<number>) => {
+      state.borderRadius = action.payload;
+    },
+    setBorderColor: (state, action: PayloadAction<string>) => {
+      state.borderColor = action.payload;
+    },
+    setIconColor: (state, action: PayloadAction<string>) => {
+      state.iconColor = action.payload;
+    },
     addIcon: (state, action: PayloadAction<IconData>) => {
-      state.selectedIcons.push(action.payload);
+      if (state.selectedIcons.length < 4) {
+        state.selectedIcons.push(action.payload);
+      }
     },
     removeIcon: (state, action: PayloadAction<number>) => {
       state.selectedIcons.splice(action.payload, 1);
-    },
-    reorderIcons: (state, action: PayloadAction<IconData[]>) => {
-      state.selectedIcons = action.payload;
     }
   }
 });
@@ -68,9 +91,12 @@ export const {
   setIconSpacing,
   setBannerWidth,
   setBannerHeight,
+  setBorderWidth,
+  setBorderRadius,
+  setBorderColor,
+  setIconColor,
   addIcon,
-  removeIcon,
-  reorderIcons
+  removeIcon
 } = bannerSlice.actions;
 
 export default bannerSlice.reducer;

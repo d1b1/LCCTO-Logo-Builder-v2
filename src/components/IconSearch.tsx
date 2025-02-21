@@ -50,6 +50,11 @@ export function IconSearch({ onSelectIcon, selectedIcon, onSelectStyle }: IconSe
   const clearSearch = () => {
     setQuery('');
     setResults([]);
+    onSelectIcon(null);
+  };
+
+  const handleIconClick = (icon: IconData) => {
+    onSelectIcon(icon);
   };
 
   const renderIconRow = (icon: IconData) => {
@@ -64,15 +69,15 @@ export function IconSearch({ onSelectIcon, selectedIcon, onSelectStyle }: IconSe
                 <p className="text-xs text-gray-500">Unicode: {icon.unicode}</p>
               </div>
             </div>
-            <div className="flex-1 grid grid-cols-8 gap-2">
-              {icon.membership?.pro?.map((style, index) => (
+            <div className="flex-1 grid grid-cols-5 gap-2">
+              {icon.membership.pro.map((style, index) => (
                 <button
                   key={`${style.family}-${style.style}-${index}`}
                   onClick={() => onSelectStyle(icon, style)}
-                  className="p-2 border rounded hover:bg-blue-50 hover:border-blue-300 transition-colors flex flex-col items-center"
+                  className="p-3 border rounded hover:bg-blue-50 hover:border-blue-300 transition-colors flex flex-col items-center gap-2"
                 >
-                  <i className={`fa-${style.family} fa-${icon.name} fa-${style.style} text-lg text-gray-700`}></i>
-                  <span className="text-[10px] text-gray-500 mt-1">{style.style}</span>
+                  <i className={`fa-${style.family} fa-${icon.name} fa-${style.style} text-xl text-gray-700`}></i>
+                  <span className="text-xs text-gray-600 capitalize">{style.style}</span>
                 </button>
               ))}
             </div>
@@ -83,7 +88,7 @@ export function IconSearch({ onSelectIcon, selectedIcon, onSelectStyle }: IconSe
 
     return (
       <button
-        onClick={() => onSelectIcon(icon)}
+        onClick={() => handleIconClick(icon)}
         className="p-4 bg-white rounded-lg shadow-sm hover:shadow transition-shadow duration-200 flex items-center gap-3"
       >
         <i className={`fa-${icon.family} fa-${icon.name} fa-${icon.style} text-2xl text-gray-700`}></i>

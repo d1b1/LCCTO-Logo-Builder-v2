@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
-import { X, Download } from 'lucide-react';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { X, Download, Plus } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { IconSearch } from './components/IconSearch';
 import { ExportModal } from './components/ExportModal';
@@ -11,9 +10,12 @@ import {
   setIconSpacing,
   setBannerWidth,
   setBannerHeight,
+  setBorderWidth,
+  setBorderRadius,
+  setBorderColor,
+  setIconColor,
   addIcon,
   removeIcon,
-  reorderIcons
 } from './store/bannerSlice';
 
 function App() {
@@ -23,6 +25,10 @@ function App() {
     iconSpacing,
     bannerWidth,
     bannerHeight,
+    borderWidth,
+    borderRadius,
+    borderColor,
+    iconColor,
     selectedIcons
   } = useSelector((state: RootState) => state.banner);
   
@@ -33,20 +39,11 @@ function App() {
   const addToCollection = (icon: IconData, style: { family: string; style: string }) => {
     const iconWithStyle = { ...icon, family: style.family, style: style.style };
     dispatch(addIcon(iconWithStyle));
+    setSelectedIcon(null);
   };
 
   const removeFromCollection = (index: number) => {
     dispatch(removeIcon(index));
-  };
-
-  const handleDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
-
-    const items = Array.from(selectedIcons);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    dispatch(reorderIcons(items));
   };
 
   const exportBanner = async (filename: string) => {
@@ -60,6 +57,13 @@ function App() {
       width: bannerWidth,
       height: bannerHeight,
       scale: 2,
+      onclone: (clonedDoc) => {
+        const clonedElement = clonedDoc.querySelector('.logo-grid') as HTMLElement;
+        if (clonedElement) {
+          clonedElement.style.position = 'static';
+          clonedElement.style.transform = 'none';
+        }
+      }
     });
 
     const link = document.createElement('a');
@@ -73,167 +77,221 @@ function App() {
     <div className="min-h-screen bg-gray-100">
       <div className="container mx-auto p-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Low Code Banner</h1>
-          <p className="text-gray-600">Search through the Font Awesome icon library</p>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Logo Builder</h1>
+          <p className="text-gray-600">Create a 2x2 grid logo with Font Awesome icons</p>
         </div>
 
-        {selectedIcons.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8">            
-            <div className="relative mb-6">
-              <div className="mx-auto overflow-hidden bg-gray-100 p-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Logo Preview and Settings */}
+          <div className="space-y-8">
+            {/* Logo Preview */}
+            <div className="bg-white rounded-lg shadow-md p-6">            
+              <div className="relative mb-6">
                 <div 
                   ref={previewRef}
-                  className="mx-auto bg-white relative"
+                  className="mx-auto bg-white relative rounded-lg overflow-hidden"
                   style={{ 
                     width: `${bannerWidth}px`, 
                     height: `${bannerHeight}px`,
-                    minWidth: '100px',
-                    minHeight: '50px'
                   }}
                 >
-                  <DragDropContext onDragEnd={handleDragEnd}>
-                    <Droppable droppableId="icons" direction="horizontal">
-                      {(provided) => (
+                  <div 
+                    className="logo-grid w-full h-full grid grid-cols-2 grid-rows-2 p-4"
+                    style={{ 
+                      gap: `${iconSpacing}px`,
+                      border: `${borderWidth}px solid ${borderColor}`,
+                      borderRadius: `${borderRadius}px`
+                    }}
+                  >
+                    {Array.from({ length: 4 }).map((_, index) => {
+                      const icon = selectedIcons[index];
+                      return (
                         <div
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center"
-                          style={{ gap: `${iconSpacing}px` }}
+                          key={index}
+                          onClick={() => icon && removeFromCollection(index)}
+                          className="relative flex items-center justify-center cursor-pointer"
                         >
-                          {selectedIcons.map((icon, index) => (
-                            <Draggable 
-                              key={`${icon.objectID}-${index}`}
-                              draggableId={`${icon.objectID}-${index}`}
-                              index={index}
-                            >
-                              {(provided, snapshot) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className={`relative group cursor-move ${snapshot.isDragging ? 'opacity-50' : ''}`}
-                                >
-                                  <div className="p-2">
-                                    <i 
-                                      className={`fa-${icon.family} fa-${icon.name} fa-${icon.style} text-gray-700`}
-                                      style={{ fontSize: `${iconSize}px` }}
-                                    ></i>
-                                  </div>
-                                  <button
-                                    onClick={() => removeFromCollection(index)}
-                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                  >
-                                    <X className="h-3 w-3" />
-                                  </button>
-                                </div>
-                              )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
+                          {icon ? (
+                            <i 
+                              className={`fa-${icon.family} fa-${icon.name} fa-${icon.style} transition-colors`}
+                              style={{ 
+                                fontSize: `${iconSize}px`,
+                                color: iconColor
+                              }}
+                            />
+                          ) : (
+                            <div className="flex flex-col items-center text-gray-300">
+                              <Plus className="w-6 h-6 mb-1" />
+                              <span className="text-xs">Empty Slot</span>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </Droppable>
-                  </DragDropContext>
-                </div>
-              </div>
-              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-sm text-gray-500">
-                {bannerWidth} x {bannerHeight} pixels
-              </div>
-            </div>
-
-            <div className="space-y-6 mt-8 p-4 border-t border-gray-200">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="bannerWidth" className="block text-sm font-medium text-gray-700 mb-2">
-                    Banner Width
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      id="bannerWidth"
-                      min="100"
-                      max="2000"
-                      value={bannerWidth}
-                      onChange={(e) => dispatch(setBannerWidth(Number(e.target.value)))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-12"
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">px</span>
-                  </div>
-                </div>
-                <div>
-                  <label htmlFor="bannerHeight" className="block text-sm font-medium text-gray-700 mb-2">
-                    Banner Height
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      id="bannerHeight"
-                      min="50"
-                      max="1000"
-                      value={bannerHeight}
-                      onChange={(e) => dispatch(setBannerHeight(Number(e.target.value)))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-12"
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">px</span>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="iconSize" className="block text-sm font-medium text-gray-700 mb-2">
-                    Icon Size (px)
-                  </label>
-                  <div className="flex items-center gap-4">
-                    <input
-                      type="range"
-                      id="iconSize"
-                      min="16"
-                      max="96"
-                      value={iconSize}
-                      onChange={(e) => dispatch(setIconSize(Number(e.target.value)))}
-                      className="w-full"
-                    />
-                    <span className="text-sm text-gray-600 w-12">{iconSize}px</span>
+              {/* Settings */}
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="iconSize" className="block text-sm font-medium text-gray-700 mb-2">
+                      Icon Size
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="range"
+                        id="iconSize"
+                        min="32"
+                        max="200"
+                        value={iconSize}
+                        onChange={(e) => dispatch(setIconSize(Number(e.target.value)))}
+                        className="w-full"
+                      />
+                      <span className="text-sm text-gray-600 w-12">{iconSize}px</span>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <label htmlFor="iconSpacing" className="block text-sm font-medium text-gray-700 mb-2">
-                    Icon Spacing (px)
-                  </label>
-                  <div className="flex items-center gap-4">
-                    <input
-                      type="range"
-                      id="iconSpacing"
-                      min="8"
-                      max="96"
-                      value={iconSpacing}
-                      onChange={(e) => dispatch(setIconSpacing(Number(e.target.value)))}
-                      className="w-full"
-                    />
-                    <span className="text-sm text-gray-600 w-12">{iconSpacing}px</span>
-                  </div>
-                </div>
-              </div>
 
-              <div className="pt-4 border-t border-gray-200">
-                <button
-                  onClick={() => setIsExportModalOpen(true)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Download className="h-4 w-4" />
-                  Export Banner
-                </button>
+                  <div>
+                    <label htmlFor="iconSpacing" className="block text-sm font-medium text-gray-700 mb-2">
+                      Grid Spacing
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="range"
+                        id="iconSpacing"
+                        min="8"
+                        max="48"
+                        value={iconSpacing}
+                        onChange={(e) => dispatch(setIconSpacing(Number(e.target.value)))}
+                        className="w-full"
+                      />
+                      <span className="text-sm text-gray-600 w-12">{iconSpacing}px</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="borderWidth" className="block text-sm font-medium text-gray-700 mb-2">
+                      Border Width
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="range"
+                        id="borderWidth"
+                        min="1"
+                        max="10"
+                        value={borderWidth}
+                        onChange={(e) => dispatch(setBorderWidth(Number(e.target.value)))}
+                        className="w-full"
+                      />
+                      <span className="text-sm text-gray-600 w-12">{borderWidth}px</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="borderRadius" className="block text-sm font-medium text-gray-700 mb-2">
+                      Border Radius
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="range"
+                        id="borderRadius"
+                        min="0"
+                        max="32"
+                        value={borderRadius}
+                        onChange={(e) => dispatch(setBorderRadius(Number(e.target.value)))}
+                        className="w-full"
+                      />
+                      <span className="text-sm text-gray-600 w-12">{borderRadius}px</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="borderColor" className="block text-sm font-medium text-gray-700 mb-2">
+                      Border Color
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="color"
+                        id="borderColor"
+                        value={borderColor}
+                        onChange={(e) => dispatch(setBorderColor(e.target.value))}
+                        className="h-9 w-16 rounded cursor-pointer"
+                      />
+                      <span className="text-sm text-gray-600 font-mono">{borderColor}</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="iconColor" className="block text-sm font-medium text-gray-700 mb-2">
+                      Icon Color
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="color"
+                        id="iconColor"
+                        value={iconColor}
+                        onChange={(e) => dispatch(setIconColor(e.target.value))}
+                        className="h-9 w-16 rounded cursor-pointer"
+                      />
+                      <span className="text-sm text-gray-600 font-mono">{iconColor}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="bannerWidth" className="block text-sm font-medium text-gray-700 mb-2">
+                      Logo Size
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        id="bannerWidth"
+                        min="200"
+                        max="2000"
+                        value={bannerWidth}
+                        onChange={(e) => {
+                          const size = Number(e.target.value);
+                          dispatch(setBannerWidth(size));
+                          dispatch(setBannerHeight(size));
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-12"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">px</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-gray-200">
+                  <button
+                    onClick={() => setIsExportModalOpen(true)}
+                    disabled={selectedIcons.length === 0}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Download className="h-4 w-4" />
+                    Export Logo
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        )}
 
-        <IconSearch 
-          onSelectIcon={setSelectedIcon} 
-          selectedIcon={selectedIcon}
-          onSelectStyle={addToCollection}
-        />
+          {/* Right Column - Icon Search */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-6">Icon Library</h2>
+            <IconSearch 
+              onSelectIcon={setSelectedIcon} 
+              selectedIcon={selectedIcon}
+              onSelectStyle={addToCollection}
+            />
+          </div>
+        </div>
 
         <ExportModal
           isOpen={isExportModalOpen}
