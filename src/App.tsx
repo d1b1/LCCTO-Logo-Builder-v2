@@ -63,6 +63,10 @@ function App() {
     tempContainer.style.height = `${bannerHeight}px`;
     document.body.appendChild(tempContainer);
 
+    // Calculate grid dimensions
+    const cellHeight = (bannerHeight - (iconSpacing * 3)) / 2;
+    const verticalOffset = iconSize / 2.6; // Offset to center icons vertically
+
     // Create the export layout
     tempContainer.innerHTML = `
       <div 
@@ -81,11 +85,24 @@ function App() {
       >
         ${Array.from({ length: 4 }).map((_, index) => {
           const icon = selectedIcons[index];
+          const row = Math.floor(index / 2);
+          const yOffset = row * cellHeight + (cellHeight / 2) - verticalOffset;
+          
           return icon ? `
-            <div style="display: flex; align-items: center; justify-content: center;">
+            <div style="
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transform: translateY(-${verticalOffset}px);
+            ">
               <i 
                 class="fa-${icon.family} fa-${icon.name} fa-${icon.style}"
-                style="font-size: ${iconSize}px; color: ${iconColor};"
+                style="
+                  font-size: ${iconSize}px;
+                  color: ${iconColor};
+                  display: inline-block;
+                  line-height: 1;
+                "
               ></i>
             </div>
           ` : `
@@ -168,13 +185,18 @@ function App() {
                           key={index}
                           onClick={() => icon && removeFromCollection(index)}
                           className="relative flex items-center justify-center cursor-pointer"
+                          style={{
+                            transform: `translateY(-${iconSize / 2}px)`
+                          }}
                         >
                           {icon ? (
                             <i 
                               className={`fa-${icon.family} fa-${icon.name} fa-${icon.style} transition-colors`}
                               style={{ 
                                 fontSize: `${iconSize}px`,
-                                color: iconColor
+                                color: iconColor,
+                                lineHeight: 1,
+                                display: 'inline-block'
                               }}
                             />
                           ) : (
