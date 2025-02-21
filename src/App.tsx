@@ -65,7 +65,7 @@ function App() {
 
     // Calculate grid dimensions
     const cellHeight = (bannerHeight - (iconSpacing * 3)) / 2;
-    const verticalOffset = iconSize / 2.6; // Offset to center icons vertically
+    const verticalOffset = iconSize / 2; // Offset to center icons vertically
 
     // Create the export layout
     tempContainer.innerHTML = `
@@ -184,21 +184,23 @@ function App() {
                         <div
                           key={index}
                           onClick={() => icon && removeFromCollection(index)}
-                          className="relative flex items-center justify-center cursor-pointer"
-                          style={{
-                            transform: `translateY(-${iconSize / 2}px)`
-                          }}
+                          className="relative flex items-center justify-center cursor-pointer group"
                         >
                           {icon ? (
-                            <i 
-                              className={`fa-${icon.family} fa-${icon.name} fa-${icon.style} transition-colors`}
-                              style={{ 
-                                fontSize: `${iconSize}px`,
-                                color: iconColor,
-                                lineHeight: 1,
-                                display: 'inline-block'
-                              }}
-                            />
+                            <>
+                              <i 
+                                className={`fa-${icon.family} fa-${icon.name} fa-${icon.style} transition-colors`}
+                                style={{ 
+                                  fontSize: `${iconSize}px`,
+                                  color: iconColor,
+                                  lineHeight: 1,
+                                  display: 'inline-block'
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity rounded-lg flex items-center justify-center">
+                                <X className="text-black opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </div>
+                            </>
                           ) : (
                             <div className="flex flex-col items-center text-gray-300">
                               <Plus className="w-6 h-6 mb-1" />
