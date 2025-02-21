@@ -10,6 +10,7 @@ interface BannerState {
   borderRadius: number;
   borderColor: string;
   iconColor: string;
+  borderOffset: number;
   selectedIcons: IconData[];
 }
 
@@ -26,6 +27,7 @@ const loadState = (): BannerState => {
         borderRadius: 16,
         borderColor: '#000000',
         iconColor: '#374151',
+        borderOffset: 0,
         selectedIcons: []
       };
     }
@@ -40,6 +42,7 @@ const loadState = (): BannerState => {
       borderRadius: 16,
       borderColor: '#000000',
       iconColor: '#374151',
+      borderOffset: 0,
       selectedIcons: []
     };
   }
@@ -75,6 +78,9 @@ export const bannerSlice = createSlice({
     setIconColor: (state, action: PayloadAction<string>) => {
       state.iconColor = action.payload;
     },
+    setBorderOffset: (state, action: PayloadAction<number>) => {
+      state.borderOffset = action.payload;
+    },
     addIcon: (state, action: PayloadAction<IconData>) => {
       if (state.selectedIcons.length < 4) {
         state.selectedIcons.push(action.payload);
@@ -95,6 +101,7 @@ export const {
   setBorderRadius,
   setBorderColor,
   setIconColor,
+  setBorderOffset,
   addIcon,
   removeIcon
 } = bannerSlice.actions;

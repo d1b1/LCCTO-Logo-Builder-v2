@@ -14,6 +14,7 @@ import {
   setBorderRadius,
   setBorderColor,
   setIconColor,
+  setBorderOffset,
   addIcon,
   removeIcon,
 } from './store/bannerSlice';
@@ -29,6 +30,7 @@ function App() {
     borderRadius,
     borderColor,
     iconColor,
+    borderOffset,
     selectedIcons
   } = useSelector((state: RootState) => state.banner);
   
@@ -74,41 +76,50 @@ function App() {
           width: ${bannerWidth}px;
           height: ${bannerHeight}px;
           background: white;
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          grid-template-rows: repeat(2, 1fr);
-          gap: ${iconSpacing}px;
-          padding: ${iconSpacing}px;
-          border: ${borderWidth}px solid ${borderColor};
-          border-radius: ${borderRadius}px;
+          padding: ${borderOffset}px;
         "
       >
-        ${Array.from({ length: 4 }).map((_, index) => {
-          const icon = selectedIcons[index];
-          const row = Math.floor(index / 2);
-          const yOffset = row * cellHeight + (cellHeight / 2) - verticalOffset;
-          
-          return icon ? `
-            <div style="
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              transform: translateY(-${verticalOffset}px);
-            ">
-              <i 
-                class="fa-${icon.family} fa-${icon.name} fa-${icon.style}"
-                style="
-                  font-size: ${iconSize}px;
-                  color: ${iconColor};
-                  display: inline-block;
-                  line-height: 1;
-                "
-              ></i>
-            </div>
-          ` : `
-            <div></div>
-          `;
-        }).join('')}
+        <div
+          style="
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: ${iconSpacing}px;
+            padding: ${iconSpacing}px;
+            border: ${borderWidth}px solid ${borderColor};
+            border-radius: ${borderRadius}px;
+          "
+        >
+          ${Array.from({ length: 4 }).map((_, index) => {
+            const icon = selectedIcons[index];
+            const row = Math.floor(index / 2);
+            const yOffset = row * cellHeight + (cellHeight / 2) - verticalOffset;
+            
+            return icon ? `
+              <div style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transform: translateY(-${verticalOffset}px);
+              ">
+                <i 
+                  class="fa-${icon.family} fa-${icon.name} fa-${icon.style}"
+                  style="
+                    font-size: ${iconSize}px;
+                    color: ${iconColor};
+                    display: inline-block;
+                    line-height: 1;
+                  "
+                ></i>
+              </div>
+            ` : `
+              <div></div>
+            `;
+          }).join('')}
+        </div>
       </div>
     `;
 
@@ -160,18 +171,20 @@ function App() {
           {/* Left Column - Logo Preview and Settings */}
           <div className="space-y-8">
             {/* Logo Preview */}
-            <div className="bg-white rounded-lg shadow-md p-6">            
+            <div className="bg-gray-50 rounded-lg shadow-md p-6">            
               <div className="relative mb-6">
                 <div 
                   ref={previewRef}
-                  className="mx-auto bg-white relative rounded-lg overflow-hidden"
+                  className="mx-auto relative rounded-lg overflow-hidden"
                   style={{ 
                     width: `${bannerWidth}px`, 
                     height: `${bannerHeight}px`,
+                    padding: `${borderOffset}px`,
+                    background: 'white'
                   }}
                 >
                   <div 
-                    className="logo-grid w-full h-full grid grid-cols-2 grid-rows-2 p-4"
+                    className="logo-grid w-full h-full grid grid-cols-2 grid-rows-2 p-4 bg-white"
                     style={{ 
                       gap: `${iconSpacing}px`,
                       border: `${borderWidth}px solid ${borderColor}`,
@@ -294,6 +307,24 @@ function App() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
+                    <label htmlFor="borderOffset" className="block text-sm font-medium text-gray-700 mb-2">
+                      Border Offset
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <input
+                        type="range"
+                        id="borderOffset"
+                        min="0"
+                        max="48"
+                        value={borderOffset}
+                        onChange={(e) => dispatch(setBorderOffset(Number(e.target.value)))}
+                        className="w-full"
+                      />
+                      <span className="text-sm text-gray-600 w-12">{borderOffset}px</span>
+                    </div>
+                  </div>
+
+                  <div>
                     <label htmlFor="borderColor" className="block text-sm font-medium text-gray-700 mb-2">
                       Border Color
                     </label>
@@ -308,7 +339,9 @@ function App() {
                       <span className="text-sm text-gray-600 font-mono">{borderColor}</span>
                     </div>
                   </div>
+                </div>
 
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="iconColor" className="block text-sm font-medium text-gray-700 mb-2">
                       Icon Color
@@ -324,9 +357,7 @@ function App() {
                       <span className="text-sm text-gray-600 font-mono">{iconColor}</span>
                     </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="bannerWidth" className="block text-sm font-medium text-gray-700 mb-2">
                       Logo Size
