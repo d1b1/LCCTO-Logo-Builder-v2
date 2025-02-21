@@ -49,28 +49,86 @@ function App() {
   const exportBanner = async (filename: string) => {
     if (!previewRef.current) return;
 
+    // Wait for fonts to load
     await document.fonts.ready;
-
+    
     const html2canvas = (await import('html2canvas')).default;
-    const canvas = await html2canvas(previewRef.current, {
-      backgroundColor: 'white',
-      width: bannerWidth,
-      height: bannerHeight,
-      scale: 2,
-      onclone: (clonedDoc) => {
-        const clonedElement = clonedDoc.querySelector('.logo-grid') as HTMLElement;
-        if (clonedElement) {
-          clonedElement.style.position = 'static';
-          clonedElement.style.transform = 'none';
-        }
-      }
-    });
+    
+    // Create a temporary container for export
+    const tempContainer = document.createElement('div');
+    tempContainer.style.position = 'absolute';
+    tempContainer.style.left = '-9999px';
+    tempContainer.style.top = '-9999px';
+    tempContainer.style.width = `${bannerWidth}px`;
+    tempContainer.style.height = `${bannerHeight}px`;
+    document.body.appendChild(tempContainer);
 
-    const link = document.createElement('a');
-    link.download = `${filename}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-    setIsExportModalOpen(false);
+    // Create the export layout
+    tempContainer.innerHTML = `
+      <div 
+        style="
+          width: ${bannerWidth}px;
+          height: ${bannerHeight}px;
+          background: white;
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          grid-template-rows: repeat(2, 1fr);
+          gap: ${iconSpacing}px;
+          padding: ${iconSpacing}px;
+          border: ${borderWidth}px solid ${borderColor};
+          border-radius: ${borderRadius}px;
+        "
+      >
+        ${Array.from({ length: 4 }).map((_, index) => {
+          const icon = selectedIcons[index];
+          return icon ? `
+            <div style="display: flex; align-items: center; justify-content: center;">
+              <i 
+                class="fa-${icon.family} fa-${icon.name} fa-${icon.style}"
+                style="font-size: ${iconSize}px; color: ${iconColor};"
+              ></i>
+            </div>
+          ` : `
+            <div></div>
+          `;
+        }).join('')}
+      </div>
+    `;
+
+    try {
+      // Render to canvas
+      const canvas = await html2canvas(tempContainer, {
+        backgroundColor: 'white',
+        width: bannerWidth,
+        height: bannerHeight,
+        scale: 2,
+        logging: false,
+        allowTaint: true,
+        useCORS: true,
+        onclone: (clonedDoc) => {
+          // Ensure styles are applied in cloned document
+          const style = clonedDoc.createElement('style');
+          style.textContent = document.querySelector('style')?.textContent || '';
+          clonedDoc.head.appendChild(style);
+          
+          // Copy Font Awesome links
+          document.querySelectorAll('link[href*="fontawesome"]').forEach(link => {
+            const clonedLink = link.cloneNode(true) as HTMLLinkElement;
+            clonedDoc.head.appendChild(clonedLink);
+          });
+        }
+      });
+
+      // Create download link
+      const link = document.createElement('a');
+      link.download = `${filename}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } finally {
+      // Clean up
+      document.body.removeChild(tempContainer);
+      setIsExportModalOpen(false);
+    }
   };
 
   return (
