@@ -40,3 +40,10 @@ No-Code and Low-Code tools and patterns to built revenue generating
 applications, without the need to code.
 
 [Subscribe to my newsletter](https://lowCodeCTO.com)
+
+## Local Development
+Reminder of commands for local tweaks.
+
+`npm run dev` - for local development.
+`npm run build` - to build the dist folder.
+`netlify deploy` or `netlify dev --prod` - to deploy to netlify.
