@@ -1,6 +1,6 @@
 # "Februrary No Code Challenge"
 This is part of my no-code-feb, where I try to build applications
-of increasing complexity to find the outter limit of what AI can do
+of increasing complexity to find the outer limit of what AI can do
 to replace my code-first inner developer.
 
 - __When__: Week 3 Feb 2025
