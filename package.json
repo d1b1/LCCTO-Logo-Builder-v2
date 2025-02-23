@@ -1,13 +1,16 @@
 {
-  "name": "vite-react-typescript-starter",
+  "name": "low-code-cto-logo-builder-v2",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "author": "Stephan Smith",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:staging": "npm run build && netlify deploy",
+    "deploy:prod": "npm run build && netlify deploy --prod"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.1",
